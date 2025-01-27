@@ -5,11 +5,13 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from .models import Event, Ticket
 from .serializers import UserSerializer, EventSerializer, TicketPurchaseSerializer
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, BasePermission
 
 
 User = get_user_model()
-
+class IsAdminRole(BasePermission):
+    def has_permission(self, request, view):
+        return request.user.is_authenticated and request.user.role == "Admin"
 # User Registration View
 class RegisterUserView(generics.CreateAPIView):
     queryset = User.objects.all()
@@ -27,10 +29,8 @@ class EventListCreateView(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticated]  
 
     def get_permissions(self):
-        # check permissions for creating and getting events
         if self.request.method == 'POST':
-            print(self.request.user.id)
-            return [permissions.IsAdminUser()]
+            return [IsAdminRole()]
         return [permissions.AllowAny()]
 
 # Ticket Purchase View (User Only)

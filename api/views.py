@@ -10,9 +10,13 @@ class CustomTokenObtainPairView(TokenObtainPairView):
 
 
 class RegisterUserView(generics.CreateAPIView):
-
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
     def perform_create(self, serializer):
-        serializer.save(password=make_password(serializer.validated_data['password']))
+        role = serializer.validated_data.get('role', 'User')
+        is_staff = True if role == "Admin" else False
+        serializer.save(
+            password=make_password(serializer.validated_data['password']),
+            is_staff=is_staff
+        )
